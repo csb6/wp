@@ -33,4 +33,4 @@ fun wp stmt postCond = (case (stmt, postCond) of
   | _                                            => raise todo
 )
 
-end (* structure Wp *)
+end (* structure WP *)
