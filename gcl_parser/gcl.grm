@@ -38,6 +38,7 @@ fun addVar s = AST.Var (addSymbol s)
 
 STMT : SKIP        (AST.Skip defaultPos)
      | ABORT       (AST.Abort defaultPos)
+     | EXPR        (AST.ExprStmt EXPR)
      | ASSIGN_STMT (ASSIGN_STMT)
 
 ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, defaultPos))
