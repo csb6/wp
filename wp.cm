@@ -1,0 +1,6 @@
+Library
+    structure WP
+is
+    wp.sml
+    gcl/gcl.cm
+    $/basis.cm

@@ -1,0 +1,11 @@
+Library
+    structure GCLParser
+is
+    gcl_parser.sml
+    tokens.sig
+    gcl.lex
+    gcl.grm
+    ../gcl/gcl.cm
+    $/smlnj-lib.cm
+    $/ml-yacc-lib.cm
+    $/basis.cm

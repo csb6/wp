@@ -1,0 +1,8 @@
+Library
+    structure AST
+    structure Check
+is
+    ast.sml
+    check.sml
+    $/smlnj-lib.cm
+    $/basis.cm

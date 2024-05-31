@@ -1,0 +1,60 @@
+val symbols = ref AtomSet.empty
+
+fun addSymbol s = let
+    val a = Atom.atom s in
+    case AtomSet.find (fn item => Atom.compare (item, a) = EQUAL) (!symbols) of
+       NONE      => (symbols := AtomSet.add (!symbols, a); a)
+     | SOME item => item
+end
+
+fun addVar s = AST.Var (addSymbol s)
+
+%%
+
+%name GCL
+%pure
+%verbose
+%pos AST.pos
+
+%term PLUS | MINUS | TIMES | DIVIDE | EQUAL | NOT_EQUAL | AND | OR | ASSIGN | SEMICOLON | BAR
+    | COMMA | IF | END | SKIP | ABORT | INT of int | BOOL of bool | IDENT of string | EOF
+
+%nonterm STMT of AST.statement | ASSIGN_STMT of AST.statement | EXPR of AST.expression
+       | BINEXPR of AST.expression
+
+%eop EOF
+%noshift EOF
+
+%left SEMICOLON
+%left OR
+%left AND
+%nonassoc EQUAL NOT_EQUAL
+%left MINUS PLUS
+%left DIVIDE TIMES
+
+%%
+
+(* Statements *)
+
+STMT : SKIP        (AST.Skip defaultPos)
+     | ABORT       (AST.Abort defaultPos)
+     | ASSIGN_STMT (ASSIGN_STMT)
+
+ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, defaultPos))
+(* TODO: concurrent assignment *)
+
+(* Expressions *)
+
+EXPR : BOOL    (AST.Bool (BOOL, defaultPos))
+     | INT     (AST.Int (INT, defaultPos))
+     | IDENT   (AST.VarExpr (addVar IDENT, defaultPos))
+     | BINEXPR (BINEXPR)
+
+BINEXPR : EXPR PLUS EXPR      (AST.BinExpr (EXPR1, AST.Plus, EXPR2, defaultPos))
+        | EXPR MINUS EXPR     (AST.BinExpr (EXPR1, AST.Minus, EXPR2, defaultPos))
+        | EXPR TIMES EXPR     (AST.BinExpr (EXPR1, AST.Mult, EXPR2, defaultPos))
+        | EXPR DIVIDE EXPR    (AST.BinExpr (EXPR1, AST.Div, EXPR2, defaultPos))
+        | EXPR EQUAL EXPR     (AST.BinExpr (EXPR1, AST.Eq, EXPR2, defaultPos))
+        | EXPR NOT_EQUAL EXPR (AST.BinExpr (EXPR1, AST.Ne, EXPR2, defaultPos))
+        | EXPR AND EXPR       (AST.BinExpr (EXPR1, AST.And, EXPR2, defaultPos))
+        | EXPR OR EXPR        (AST.BinExpr (EXPR1, AST.Or, EXPR2, defaultPos))
