@@ -42,7 +42,7 @@ fun typeCheckExpr expr = (case expr of
         else if not (typeCheckOperands oper leftType rightType) then
             raise TypeError ("Operator in binary expression used with wrong type of operands", pos)
         else
-            leftType
+            operatorType oper
     end
 )
 
