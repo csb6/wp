@@ -50,7 +50,7 @@ fun typeCheckStmt stmt = (case stmt of
     Skip _               => ()
   | Abort _              => ()
   | ExprStmt expr        => (typeCheckExpr expr; ())
-  | Seq (first, next)    => (typeCheckStmt first; typeCheckStmt next; ())
+  | Seq s                => List.app typeCheckStmt s
   | Assignment (_, expr, pos) =>
     if typeCheckExpr expr <> IntType then
         raise TypeError ("Attempted to assign boolean expression to integer variable", pos)

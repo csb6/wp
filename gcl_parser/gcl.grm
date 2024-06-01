@@ -9,6 +9,9 @@ end
 
 fun addVar s = AST.Var (addSymbol s)
 
+fun toStmt [stmt]   = stmt
+  | toStmt stmtList = AST.Seq (rev stmtList)
+
 %%
 
 %name GCL
@@ -22,6 +25,7 @@ fun addVar s = AST.Var (addSymbol s)
 
 %nonterm START of AST.statement | STMT of AST.statement | ASSIGN_STMT of AST.statement | EXPR of AST.expression
        | BINEXPR of AST.expression | GUARDED_CMD of AST.guarded_command | GUARDED_CMD_SET of AST.guarded_command list
+       | STMT_LIST of AST.statement list
 
 %eop EOF
 %noshift EOF
@@ -48,9 +52,12 @@ STMT : SKIP                   (AST.Skip defaultPos)
 ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, defaultPos))
 (* TODO: concurrent assignment *)
 
+STMT_LIST : STMT                     ([STMT])
+          | STMT_LIST SEMICOLON STMT (STMT::STMT_LIST)
+
 (* Guarded Command *)
 
-GUARDED_CMD : EXPR ARROW STMT ((EXPR, STMT))
+GUARDED_CMD : EXPR ARROW STMT_LIST (EXPR, toStmt STMT_LIST)
 
 GUARDED_CMD_SET : GUARDED_CMD                     ([GUARDED_CMD])
                 | GUARDED_CMD_SET BAR GUARDED_CMD (GUARDED_CMD::GUARDED_CMD_SET)

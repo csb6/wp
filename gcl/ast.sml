@@ -18,10 +18,14 @@ datatype expression = Bool of bool * pos
 datatype statement = Skip of pos
                    | Abort of pos
                    | ExprStmt of expression
-                   | Seq of statement * statement
+                   | Seq of statement list
                    | Assignment of variable * expression * pos
                    | IfStmt of guarded_command list * pos
 withtype guarded_command = expression * statement
+
+ (* TODO: consider using expression's pos as its canonical position and extending
+ Assignment to hold a variable * expression * pos list. That way the line numbers align
+ with the right-hand side expression *)
 
 fun getExprPos expr = (case expr of
     Bool (_, pos)          => pos
@@ -34,7 +38,8 @@ fun getStmtPos stmt = (case stmt of
     Skip pos               => pos
   | Abort pos              => pos
   | ExprStmt expr          => getExprPos expr
-  | Seq (s1, _)            => getStmtPos s1
+  | Seq (s1::_)            => getStmtPos s1
+  | Seq []                 => raise Domain (* Parsing should guarantee [] case does not occur *)
   | Assignment (_, _, pos) => pos
   | IfStmt (_, pos)        => pos
 )
