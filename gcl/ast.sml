@@ -6,7 +6,9 @@ type symbol = Atom.atom
 datatype type_ = BoolType | IntType
 
 datatype variable = Var of symbol
-fun same_var (Var a) (Var b) = Atom.same (a, b)
+fun makeVar name = Var (Atom.atom name)
+fun sameVar (Var a) (Var b) = Atom.same (a, b)
+fun getVarName (Var a) = Atom.toString a
 
 datatype operator = Plus | Minus | Mult | Div | Eq | Ne | And | Or
 

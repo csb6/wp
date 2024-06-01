@@ -38,7 +38,7 @@ in
     case expr of
       Bool b               => Bool b
     | Int i                => Int i
-    | VarExpr v            => if AST.same_var v var then newExpr else VarExpr v
+    | VarExpr v            => if AST.sameVar v var then newExpr else VarExpr v
     | BinExpr (l, oper, r) => BinExpr (substExpr l, oper, substExpr r)
 end
 
