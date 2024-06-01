@@ -6,8 +6,8 @@ corresponding [system of predicate transformers](https://en.wikipedia.org/wiki/P
 ## Build requirements
 
 - [SML of New Jersey](https://www.smlnj.org) (SML/NJ)
-- ML-Lex (distributed alongside with SML/NJ)
-- ML-Yacc (distributed alongside with SML/NJ)
+- ML-Lex (distributed alongside SML/NJ)
+- ML-Yacc (distributed alongside SML/NJ)
 
 ## Usage
 
@@ -15,7 +15,7 @@ corresponding [system of predicate transformers](https://en.wikipedia.org/wiki/P
 
 `driver.sml` is the main entry point for running the parser. From the shell, run:
 
-    $ sml gcl/gcl.cm gcl_parser/gcl_parser.cm driver.sml
+    sml gcl/gcl.cm gcl_parser/gcl_parser.cm driver.sml
 
 Once the SML/NJ REPL launches, GCL files can be parsed by calling the `Driver.parse` function. For example:
 
@@ -27,6 +27,6 @@ This will parse and typecheck the given GCL source file.
 
 `wp.sml` is the main entry point for running the tool. From the shell, run:
 
-    $ sml gcl/gcl.cm wp.sml
+    sml gcl/gcl.cm wp.sml
 
 Once the SML/NJ REPL launches, the functions in `wp.sml` can be called.
