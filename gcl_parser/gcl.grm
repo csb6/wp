@@ -47,9 +47,9 @@ STMT : SKIP                   (AST.Skip defaultPos)
      | ABORT                  (AST.Abort defaultPos)
      | EXPR                   (AST.ExprStmt EXPR)
      | ASSIGN_STMT            (ASSIGN_STMT)
-     | IF GUARDED_CMD_SET END (AST.IfStmt (rev GUARDED_CMD_SET, defaultPos))
+     | IF GUARDED_CMD_SET END (AST.IfStmt (rev GUARDED_CMD_SET, IFleft))
 
-ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, defaultPos))
+ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, EXPRleft))
 (* TODO: concurrent assignment *)
 
 STMT_LIST : STMT                     ([STMT])
