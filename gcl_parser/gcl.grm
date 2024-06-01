@@ -17,11 +17,11 @@ fun addVar s = AST.Var (addSymbol s)
 %pos AST.pos
 
 %term PLUS | MINUS | TIMES | DIVIDE | EQUAL | NOT_EQUAL | AND | OR | ASSIGN | SEMICOLON | BAR
-    | COMMA | LPAREN | RPAREN | IF | END | SKIP | ABORT | INT of int | BOOL of bool
+    | ARROW | COMMA | LPAREN | RPAREN | IF | END | SKIP | ABORT | INT of int | BOOL of bool
     | IDENT of string | EOF
 
-%nonterm STMT of AST.statement | ASSIGN_STMT of AST.statement | EXPR of AST.expression
-       | BINEXPR of AST.expression
+%nonterm START of AST.statement | STMT of AST.statement | ASSIGN_STMT of AST.statement | EXPR of AST.expression
+       | BINEXPR of AST.expression | GUARDED_CMD of AST.guarded_command | GUARDED_CMD_SET of AST.guarded_command list
 
 %eop EOF
 %noshift EOF
@@ -35,15 +35,25 @@ fun addVar s = AST.Var (addSymbol s)
 
 %%
 
+START : STMT (STMT)
+
 (* Statements *)
 
-STMT : SKIP        (AST.Skip defaultPos)
-     | ABORT       (AST.Abort defaultPos)
-     | EXPR        (AST.ExprStmt EXPR)
-     | ASSIGN_STMT (ASSIGN_STMT)
+STMT : SKIP                   (AST.Skip defaultPos)
+     | ABORT                  (AST.Abort defaultPos)
+     | EXPR                   (AST.ExprStmt EXPR)
+     | ASSIGN_STMT            (ASSIGN_STMT)
+     | IF GUARDED_CMD_SET END (AST.IfStmt (rev GUARDED_CMD_SET, defaultPos))
 
 ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, defaultPos))
 (* TODO: concurrent assignment *)
+
+(* Guarded Command *)
+
+GUARDED_CMD : EXPR ARROW STMT ((EXPR, STMT))
+
+GUARDED_CMD_SET : GUARDED_CMD                     ([GUARDED_CMD])
+                | GUARDED_CMD_SET BAR GUARDED_CMD (GUARDED_CMD::GUARDED_CMD_SET)
 
 (* Expressions *)
 

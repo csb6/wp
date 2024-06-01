@@ -20,6 +20,8 @@ datatype statement = Skip of pos
                    | ExprStmt of expression
                    | Seq of statement * statement
                    | Assignment of variable * expression * pos
+                   | IfStmt of guarded_command list * pos
+withtype guarded_command = expression * statement
 
 fun getExprPos expr = (case expr of
     Bool (_, pos)          => pos
@@ -34,6 +36,7 @@ fun getStmtPos stmt = (case stmt of
   | ExprStmt expr          => getExprPos expr
   | Seq (s1, _)            => getStmtPos s1
   | Assignment (_, _, pos) => pos
+  | IfStmt (_, pos)        => pos
 )
 
 end (* structure AST *)

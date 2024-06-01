@@ -11,6 +11,8 @@ datatype statement = Skip
                    | ExprStmt of expression
                    | Seq of statement * statement
                    | Assignment of AST.variable * expression
+                   | IfStmt of guarded_command list
+withtype guarded_command = expression * statement
 
 exception todo
 
@@ -27,6 +29,7 @@ fun gclToWpStmt stmt = (case stmt of
   | AST.ExprStmt expr           => ExprStmt (gclToWpExpr expr)
   | AST.Seq (s1, s2)            => Seq (gclToWpStmt s1, gclToWpStmt s2)
   | AST.Assignment (v, expr, _) => Assignment (v, gclToWpExpr expr)
+  | AST.IfStmt (gcList, _)      => IfStmt (map (fn (guard, cmd) => (gclToWpExpr guard, gclToWpStmt cmd)) gcList)
 )
 
 fun substituteExpr var newExpr expr = let
@@ -49,6 +52,7 @@ in
     | ExprStmt expr        => ExprStmt (substExpr expr)
     | Seq (s1, s2)         => Seq (substStmt s1, substStmt s2)
     | Assignment (v, expr) => Assignment (v, substExpr expr)
+    | IfStmt _             => raise todo
 end
 
 fun wp stmt postCond = (case (stmt, postCond) of

@@ -43,6 +43,7 @@ end
 ";" => (Tokens.SEMICOLON (!currLine, !currLine));
 "," => (Tokens.COMMA (!currLine, !currLine));
 "|" => (Tokens.BAR (!currLine, !currLine));
+"->" => (Tokens.ARROW (!currLine, !currLine));
 "(" => (Tokens.LPAREN (!currLine, !currLine));
 ")" => (Tokens.RPAREN (!currLine, !currLine));
 

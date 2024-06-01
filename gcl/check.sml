@@ -56,7 +56,13 @@ fun typeCheckStmt stmt = (case stmt of
         raise TypeError ("Attempted to assign boolean expression to integer variable", pos)
     else
         ()
+  | IfStmt (gcList, _) => List.app typeCheckGuardedCommand gcList
 )
+and typeCheckGuardedCommand (guard, cmd) =
+    if typeCheckExpr guard <> BoolType then
+      raise TypeError ("Guard expressions must have type boolean", getExprPos guard)
+    else
+      typeCheckStmt cmd
 
 (* Assumes expr has already been typechecked successfully *)
 fun typeOfExpr expr = (case expr of

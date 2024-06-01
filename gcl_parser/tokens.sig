@@ -16,6 +16,7 @@ signature TOKENS = sig
     val LPAREN : linenum * linenum -> token
     val RPAREN : linenum * linenum -> token
     val BAR : linenum * linenum -> token
+    val ARROW : linenum * linenum -> token
     val IF : linenum * linenum -> token
     val END : linenum * linenum -> token
     val SKIP : linenum * linenum -> token
