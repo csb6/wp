@@ -17,7 +17,8 @@ fun addVar s = AST.Var (addSymbol s)
 %pos AST.pos
 
 %term PLUS | MINUS | TIMES | DIVIDE | EQUAL | NOT_EQUAL | AND | OR | ASSIGN | SEMICOLON | BAR
-    | COMMA | IF | END | SKIP | ABORT | INT of int | BOOL of bool | IDENT of string | EOF
+    | COMMA | LPAREN | RPAREN | IF | END | SKIP | ABORT | INT of int | BOOL of bool
+    | IDENT of string | EOF
 
 %nonterm STMT of AST.statement | ASSIGN_STMT of AST.statement | EXPR of AST.expression
        | BINEXPR of AST.expression
@@ -46,10 +47,11 @@ ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, defaultPos)
 
 (* Expressions *)
 
-EXPR : BOOL    (AST.Bool (BOOL, defaultPos))
-     | INT     (AST.Int (INT, defaultPos))
-     | IDENT   (AST.VarExpr (addVar IDENT, defaultPos))
-     | BINEXPR (BINEXPR)
+EXPR : BOOL               (AST.Bool (BOOL, defaultPos))
+     | INT                (AST.Int (INT, defaultPos))
+     | IDENT              (AST.VarExpr (addVar IDENT, defaultPos))
+     | BINEXPR            (BINEXPR)
+     | LPAREN EXPR RPAREN (EXPR)
 
 BINEXPR : EXPR PLUS EXPR      (AST.BinExpr (EXPR1, AST.Plus, EXPR2, PLUSleft))
         | EXPR MINUS EXPR     (AST.BinExpr (EXPR1, AST.Minus, EXPR2, MINUSleft))

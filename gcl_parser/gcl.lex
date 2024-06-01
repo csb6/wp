@@ -43,6 +43,8 @@ end
 ";" => (Tokens.SEMICOLON (!currLine, !currLine));
 "," => (Tokens.COMMA (!currLine, !currLine));
 "|" => (Tokens.BAR (!currLine, !currLine));
+"(" => (Tokens.LPAREN (!currLine, !currLine));
+")" => (Tokens.RPAREN (!currLine, !currLine));
 
 [0-9]+ => (Tokens.INT (valOf (Int.fromString (yytext)), !currLine, !currLine));
 "true" => (Tokens.BOOL (true, !currLine, !currLine));

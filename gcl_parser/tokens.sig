@@ -13,6 +13,8 @@ signature TOKENS = sig
     val ASSIGN : linenum * linenum -> token
     val SEMICOLON : linenum * linenum -> token
     val COMMA : linenum * linenum -> token
+    val LPAREN : linenum * linenum -> token
+    val RPAREN : linenum * linenum -> token
     val BAR : linenum * linenum -> token
     val IF : linenum * linenum -> token
     val END : linenum * linenum -> token
