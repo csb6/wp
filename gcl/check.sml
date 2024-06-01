@@ -1,11 +1,7 @@
 structure Check = struct
 open AST
 
-datatype type_error_type = TypeMismatch of expression * operator * expression
-                         | OpTypeMismatch of expression * operator * expression
-                         | AssignTypeMismatch of variable * expression
-
-exception TypeError of type_error_type * pos
+exception TypeError of string * pos
 
 (* Type of a binary expression with this operator *)
 fun operatorType oper = (case oper of
@@ -42,9 +38,9 @@ fun typeCheckExpr expr = (case expr of
         val rightType = typeCheckExpr r
     in
         if leftType <> rightType then
-            raise TypeError (TypeMismatch (l, oper, r), pos)
+            raise TypeError ("Type mismatch in binary expression", pos)
         else if not (typeCheckOperands oper leftType rightType) then
-            raise TypeError (OpTypeMismatch (l, oper, r), pos)
+            raise TypeError ("Operator in binary expression used with wrong type of operands", pos)
         else
             leftType
     end
@@ -55,9 +51,9 @@ fun typeCheckStmt stmt = (case stmt of
   | Abort _              => ()
   | ExprStmt expr        => (typeCheckExpr expr; ())
   | Seq (first, next)    => (typeCheckStmt first; typeCheckStmt next; ())
-  | Assignment (v, expr, pos) =>
+  | Assignment (_, expr, pos) =>
     if typeCheckExpr expr <> IntType then
-        raise TypeError (AssignTypeMismatch (v, expr), pos)
+        raise TypeError ("Attempted to assign boolean expression to integer variable", pos)
     else
         ()
 )

@@ -26,14 +26,8 @@ in
         )
       | GCLParser.ParseError =>
             (print "Parsing failed\n"; NONE)
-      | Check.TypeError (err, pos)  => ((case err of
-            Check.TypeMismatch (left, oper, right) =>
-                (printFileError pos "Type mismatch in binary expression")
-          | Check.OpTypeMismatch (left, oper, right) =>
-                (printFileError pos "Operator in binary expression used with wrong type of operands")
-          | Check.AssignTypeMismatch (var, expr) =>
-                (printFileError pos "Attempted to assign boolean expression to integer variable"));
-            NONE)
+      | Check.TypeError (errMsg, pos)  =>
+            (printFileError pos errMsg; NONE)
 end
 
 end (* structure Driver *)
