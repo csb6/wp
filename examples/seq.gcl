@@ -1,8 +1,4 @@
-if true ->
-    1;
-    2;
-    3
- | false ->
-    4
- | true -> 1 + 1
+block
+   a := a + b;
+   b := a * b
 end

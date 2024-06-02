@@ -54,6 +54,7 @@ end
 "abort" => (Tokens.ABORT (!currLine, !currLine));
 "if" => (Tokens.IF (!currLine, !currLine));
 "end" => (Tokens.END (!currLine, !currLine));
+"block" => (Tokens.BLOCK (!currLine, !currLine));
 
 [a-zA-Z][a-zA-Z_0-9]* => (Tokens.IDENT (yytext, !currLine, !currLine));
 
