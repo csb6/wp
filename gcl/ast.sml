@@ -46,4 +46,43 @@ fun getStmtPos stmt = (case stmt of
   | IfStmt (_, pos)        => pos
 )
 
+fun opToString oper = (case oper of
+    Plus  => "+"
+  | Minus => "-"
+  | Mult  => "*"
+  | Div   => "/"
+  | Eq    => "="
+  | Ne    => "!="
+  | And   => "and"
+  | Or    => "or"
+)
+
+fun joinStr sep lst = let
+    fun join lst' soFar = (case lst' of
+        []         => soFar
+      | [head]     => soFar ^ head
+      | head::tail => join tail (soFar ^ head ^ sep)
+    )
+in
+    join lst ""
+end
+
+fun exprToString expr = (case expr of
+    Bool (b, _)             => if b then "true" else "false"
+  | Int (i, _)              => Int.toString i
+  | VarExpr (v, _)          => getVarName v
+  | BinExpr (l, oper, r, _) => "(" ^ (exprToString l) ^ (opToString oper) ^ (exprToString r) ^ ")"
+)
+
+fun stmtToString stmt = (case stmt of
+    Skip _                  => "skip"
+  | Abort _                 => "abort"
+  | ExprStmt expr           => exprToString expr
+  | Seq s                   => (joinStr ";\n" (map stmtToString s)) ^ "\n"
+  | Assignment (v, expr, _) => (getVarName v) ^ " := " ^ (exprToString expr)
+  | IfStmt (gcList, _)      => "if\n" ^ (concat (map gcToString gcList)) ^ "end\n"
+)
+and gcToString (guard, stmt) =
+  (exprToString guard) ^ " -> " ^ (stmtToString stmt) ^ "\n"
+
 end (* structure AST *)
