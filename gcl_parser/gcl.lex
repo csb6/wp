@@ -21,17 +21,15 @@ type svalue = Tokens.svalue
 type ('a,'b) token = ('a,'b) Tokens.token
 type lexresult = (svalue,pos) token
 
-datatype error_info = UnknownCharacter of char
-
-exception LexerError of error_info * pos
+exception LexerError of string * pos
 
 val currLine = ref 1
-fun currChar s = String.sub (s, (size s) - 1)
+fun currChar s = str (String.sub (s, (size s) - 1))
 fun incr v = v := !v + 1
 fun resetState () = (
     currLine := 1
 )
-fun raiseError info linenum = (resetState(); raise LexerError (info, linenum))
+fun raiseError msg linenum = (resetState(); raise LexerError (msg, linenum))
 
 fun eof () = let
     val finalLine = !currLine
@@ -76,4 +74,4 @@ end
 
 [a-zA-Z][a-zA-Z_0-9]* => (Tokens.IDENT (yytext, !currLine, !currLine));
 
-. => (raiseError (UnknownCharacter (currChar yytext)) (!currLine));
+. => (raiseError ("Unexpected character: '" ^ (currChar yytext) ^ "'") (!currLine));

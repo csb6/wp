@@ -36,13 +36,8 @@ structure Driver = struct
         end
     in
         SOME (run()) handle
-            GCLParser.LexerError (err, pos) => (case err of
-                GCLParser.UnknownCharacter ch =>
-                    (printFileError pos ("Unexpected character: '" ^ (str ch) ^ "'"); NONE)
-            )
-          | GCLParser.ParseError =>
-                (print "Parsing failed\n"; NONE)
-          | Check.TypeError (errMsg, pos)  =>
-                (printFileError pos errMsg; NONE)
+            GCLParser.LexerError (errMsg, pos) => (printFileError pos errMsg; NONE)
+          | GCLParser.ParseError               => (print "Parsing failed\n"; NONE)
+          | Check.TypeError (errMsg, pos)      => (printFileError pos errMsg; NONE)
     end
 end (* structure Driver *)
