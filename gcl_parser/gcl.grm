@@ -37,13 +37,13 @@ fun toStmt [stmt]   = stmt
 %verbose
 %pos AST.pos
 
-%term PLUS | MINUS | TIMES | DIVIDE | EQUAL | NOT_EQUAL | AND | OR | ASSIGN | SEMICOLON | BAR
+%term PLUS | MINUS | TIMES | DIVIDE | EQUAL | NOT_EQUAL | AND | OR | NOT | ASSIGN | SEMICOLON | BAR
     | ARROW | COMMA | LPAREN | RPAREN | IF | END | BLOCK | SKIP | ABORT | INT of int | BOOL of bool
     | IDENT of string | EOF
 
 %nonterm START of AST.statement | STMT of AST.statement | ASSIGN_STMT of AST.statement | EXPR of AST.expression
-       | BINEXPR of AST.expression | GUARDED_CMD of AST.guarded_command | GUARDED_CMD_SET of AST.guarded_command list
-       | STMT_LIST of AST.statement list
+       | UNARYEXPR of AST.expression | BINEXPR of AST.expression | GUARDED_CMD of AST.guarded_command
+       | GUARDED_CMD_SET of AST.guarded_command list | STMT_LIST of AST.statement list
 
 %eop EOF
 %noshift EOF
@@ -54,6 +54,7 @@ fun toStmt [stmt]   = stmt
 %nonassoc EQUAL NOT_EQUAL
 %left MINUS PLUS
 %left DIVIDE TIMES
+%right NOT
 
 %%
 
@@ -87,8 +88,11 @@ GUARDED_CMD_SET : GUARDED_CMD                     ([GUARDED_CMD])
 EXPR : BOOL               (AST.Bool (BOOL, defaultPos))
      | INT                (AST.Int (INT, defaultPos))
      | IDENT              (AST.VarExpr (addVar IDENT, defaultPos))
+     | UNARYEXPR          (UNARYEXPR)
      | BINEXPR            (BINEXPR)
      | LPAREN EXPR RPAREN (EXPR)
+
+UNARYEXPR : NOT EXPR      (AST.UnaryExpr (AST.Not, EXPR))
 
 BINEXPR : EXPR PLUS EXPR      (AST.BinExpr (EXPR1, AST.Plus, EXPR2, PLUSleft))
         | EXPR MINUS EXPR     (AST.BinExpr (EXPR1, AST.Minus, EXPR2, MINUSleft))

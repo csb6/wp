@@ -55,6 +55,7 @@ end
 "!=" => (Tokens.NOT_EQUAL (!currLine, !currLine));
 "and" => (Tokens.AND (!currLine, !currLine));
 "or" => (Tokens.OR (!currLine, !currLine));
+"not" => (Tokens.NOT (!currLine, !currLine));
 ":=" => (Tokens.ASSIGN (!currLine, !currLine));
 ";" => (Tokens.SEMICOLON (!currLine, !currLine));
 "," => (Tokens.COMMA (!currLine, !currLine));

@@ -26,12 +26,15 @@ structure AST = struct
     fun sameVar (Var a) (Var b) = Atom.same (a, b)
     fun getVarName (Var a) = Atom.toString a
 
-    datatype operator = Plus | Minus | Mult | Div | Eq | Ne | And | Or
+    datatype binary_operator = Plus | Minus | Mult | Div | Eq | Ne | And | Or
+
+    datatype unary_operator = Not
 
     datatype expression = Bool of bool * pos
                         | Int of int * pos
                         | VarExpr of variable * pos
-                        | BinExpr of expression * operator * expression * pos
+                        | UnaryExpr of unary_operator * expression
+                        | BinExpr of expression * binary_operator * expression * pos
 
     datatype statement = Skip of pos
                        | Abort of pos
@@ -49,6 +52,7 @@ structure AST = struct
         Bool (_, pos)          => pos
       | Int (_, pos)           => pos
       | VarExpr (_, pos)       => pos
+      | UnaryExpr (_, e)       => getExprPos e
       | BinExpr (_, _, _, pos) => pos
     )
 
@@ -62,7 +66,11 @@ structure AST = struct
       | IfStmt (_, pos)        => pos
     )
 
-    fun opToString oper = (case oper of
+    fun unaryOpToString oper = (case oper of
+        Not => "not"
+    )
+
+    fun binOpToString oper = (case oper of
         Plus  => "+"
       | Minus => "-"
       | Mult  => "*"
@@ -87,7 +95,8 @@ structure AST = struct
         Bool (b, _)             => if b then "true" else "false"
       | Int (i, _)              => Int.toString i
       | VarExpr (v, _)          => getVarName v
-      | BinExpr (l, oper, r, _) => "(" ^ (exprToString l) ^ (opToString oper) ^ (exprToString r) ^ ")"
+      | UnaryExpr (oper, e)     => (unaryOpToString oper) ^ " " ^ (exprToString e)
+      | BinExpr (l, oper, r, _) => "(" ^ (exprToString l) ^ (binOpToString oper) ^ (exprToString r) ^ ")"
     )
 
     fun stmtToString stmt = (case stmt of

@@ -20,8 +20,12 @@ structure Check = struct
 
     exception TypeError of string * pos
 
+    fun unaryOpType oper = (case oper of
+        Not => BoolType
+    )
+
     (* Type of a binary expression with this operator *)
-    fun operatorType oper = (case oper of
+    fun binOpType oper = (case oper of
         Plus  => IntType
       | Minus => IntType
       | Mult  => IntType
@@ -30,6 +34,11 @@ structure Check = struct
       | Ne    => BoolType
       | And   => BoolType
       | Or    => BoolType
+    )
+
+    fun typeCheckOperand oper rightType = (case (oper, rightType) of
+        (Not, BoolType) => true
+      | _               => false
     )
 
     fun typeCheckOperands oper leftType rightType = (case (leftType, oper, rightType) of
@@ -50,6 +59,11 @@ structure Check = struct
         Bool _                    => BoolType
       | Int _                     => IntType
       | VarExpr _                 => IntType
+      | UnaryExpr (oper, r)       =>
+            if not (typeCheckOperand oper (typeCheckExpr r)) then
+                raise TypeError ("Operator in unary expression used with wrong type of operand", getExprPos r)
+            else
+                unaryOpType oper
       | BinExpr (l, oper, r, pos) => let
             val leftType = typeCheckExpr l
             val rightType = typeCheckExpr r
@@ -59,7 +73,7 @@ structure Check = struct
             else if not (typeCheckOperands oper leftType rightType) then
                 raise TypeError ("Operator in binary expression used with wrong type of operands", pos)
             else
-                operatorType oper
+                binOpType oper
         end
     )
 
@@ -86,6 +100,7 @@ structure Check = struct
         Bool _                  => BoolType
       | Int _                   => IntType
       | VarExpr _               => IntType
-      | BinExpr (_, oper, _, _) => operatorType oper
+      | UnaryExpr (oper, _)     => unaryOpType oper
+      | BinExpr (_, oper, _, _) => binOpType oper
     )
 end (* structure Check *)

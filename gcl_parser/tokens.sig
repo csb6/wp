@@ -27,6 +27,7 @@ signature TOKENS = sig
     val NOT_EQUAL : linenum * linenum -> token
     val AND : linenum * linenum -> token
     val OR : linenum * linenum -> token
+    val NOT : linenum * linenum -> token
     val ASSIGN : linenum * linenum -> token
     val SEMICOLON : linenum * linenum -> token
     val COMMA : linenum * linenum -> token

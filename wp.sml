@@ -16,11 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *)
 structure WP = struct
-    type operator = AST.operator
+    type binary_operator = AST.binary_operator
+    type unary_operator = AST.unary_operator
     datatype expression = Bool of bool
                         | Int of int
                         | VarExpr of AST.variable
-                        | BinExpr of expression * operator * expression
+                        | UnaryExpr of unary_operator * expression
+                        | BinExpr of expression * binary_operator * expression
 
     datatype statement = Skip
                        | Abort
@@ -36,6 +38,7 @@ structure WP = struct
         AST.Bool (b, _)             => Bool b
       | AST.Int (i, _)              => Int i
       | AST.VarExpr (v, _)          => VarExpr v
+      | AST.UnaryExpr (oper, r)     => UnaryExpr (oper, gclToWpExpr r)
       | AST.BinExpr (l, oper, r, _) => BinExpr (gclToWpExpr l, oper, gclToWpExpr r)
     )
 
@@ -55,6 +58,7 @@ structure WP = struct
             Bool b               => Bool b
           | Int i                => Int i
           | VarExpr v            => if AST.sameVar v var then newExpr else VarExpr v
+          | UnaryExpr (oper, r)  => UnaryExpr (oper, substExpr r)
           | BinExpr (l, oper, r) => BinExpr (substExpr l, oper, substExpr r)
     end
 
