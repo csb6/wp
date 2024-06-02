@@ -32,6 +32,21 @@ structure WP = struct
                        | IfStmt of guarded_command list
     withtype guarded_command = expression * statement
 
+    val == = fn(a, b) => BinExpr (a, AST.Eq, b)
+    infix ==
+
+    val != = fn(a, b) => BinExpr (a, AST.Ne, b)
+    infix !=
+
+    val || = fn (a, b) => BinExpr (a, AST.Or, b)
+    infix ||
+
+    val && = fn (a, b) => BinExpr (a, AST.And, b)
+    infix &&
+
+    val --> = fn (a, b) => (UnaryExpr (AST.Not, a)) || b
+    infix -->
+
     exception todo
 
     fun gclToWpExpr expr = (case expr of
@@ -75,16 +90,25 @@ structure WP = struct
           | IfStmt _             => raise todo
     end
 
-    fun wp stmt postCond = (case (stmt, postCond) of
-        (_,                    Bool false) => Bool false
-      | (Abort,                _)          => Bool false
-      | (Skip,                 r)          => r
-      | (Assignment (v, expr), r)          => substituteExpr v expr r
-      | (Seq s,                r)          => wpSeqStmt s r
-      | _                                  => raise todo
-      )
-    and wpSeqStmt s r = (case rev s of
-        s0::sx => foldl (fn (s', r') => wp s' r') (wp s0 r) sx
-      | []     => raise Domain
-    )
+    fun wp stmt postCond = let
+        fun wpSeqStmt s r = (case rev s of
+            s0::sx => foldl (fn (s', r') => wp s' r') (wp s0 r) sx
+          | []     => raise Domain
+        )
+        fun wpIfStmt gcList r = (case gcList of
+            (g0, c0)::gcx =>
+                foldl (op ||)  g0              (map (fn (g, _) => g)            gcx) (* At least one guard g_x is true *)
+             && foldl (op &&) (g0 --> wp c0 r) (map (fn (g, c) => g --> wp c r) gcx) (* g_x -> wp(c_x, r) *)
+          | []            => raise Domain
+        )
+    in
+        case (stmt, postCond) of
+            (_,                    Bool false) => Bool false
+          | (Abort,                _)          => Bool false
+          | (Skip,                 r)          => r
+          | (Assignment (v, expr), r)          => substituteExpr v expr r
+          | (Seq s,                r)          => wpSeqStmt s r
+          | (IfStmt gcList,        r)          => wpIfStmt gcList r
+          | _                                  => raise todo
+    end
 end (* structure WP *)
