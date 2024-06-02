@@ -3,3 +3,4 @@
 *.grm.sml
 *.lex.sml
 *.grm.desc
+.vscode/
