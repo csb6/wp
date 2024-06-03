@@ -15,16 +15,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *)
-structure Position_AST = struct
-    open AST.Basic_Types
-    open DecoratedAST
+signature AST_INTERFACE = sig
+    type symbol
+    type type_
+    type variable
+    type binary_operator
+    type unary_operator
+    type expression
+    type statement
+    type guarded_command
 
-    type pos = int
-    type statement = pos DecoratedAST.statement
-    type expression = pos DecoratedAST.expression
-    type guarded_command = pos DecoratedAST.guarded_command
-end (* structure Position_AST *)
+    val makeVar : string -> variable
+    val sameVar : variable -> variable -> bool
+    val getVarName : variable -> string
+    val unaryOpToString : unary_operator -> string
+    val binOpToString : binary_operator -> string
 
-local
-    structure Position_AST_Matches_Interface : AST_INTERFACE = Position_AST
-in end
+    val exprToString : expression -> string
+    val stmtToString : statement -> string
+end (* signature AST_INTERFACE *)

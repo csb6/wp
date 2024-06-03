@@ -92,3 +92,7 @@ structure AST = struct
     and gcToString (guard, stmt) =
         (exprToString guard) ^ " -> " ^ (stmtToString stmt) ^ "\n"
 end (* structure AST *)
+
+local
+    structure AST_Matches_Interface : AST_INTERFACE = AST
+in end

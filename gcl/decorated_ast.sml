@@ -67,4 +67,8 @@ structure DecoratedAST = struct
       | IfStmt (_, data)        => data
     )
 
+    fun exprToString expr = AST.exprToString (stripExpr expr)
+
+    fun stmtToString stmt = AST.stmtToString (stripStmt stmt)
+
 end (* structure DecoratedAST *)

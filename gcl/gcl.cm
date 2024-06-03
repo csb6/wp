@@ -2,8 +2,10 @@ Library
     structure DecoratedAST
     structure Position_AST
     structure AST
+    signature AST_INTERFACE
     structure Check
 is
+    ast.sig
     ast.sml
     decorated_ast.sml
     position_ast.sml
