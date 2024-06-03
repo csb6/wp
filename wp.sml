@@ -16,55 +16,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *)
 structure WP = struct
-    type binary_operator = AST.binary_operator
-    type unary_operator = AST.unary_operator
-    datatype expression = Bool of bool
-                        | Int of int
-                        | VarExpr of AST.variable
-                        | UnaryExpr of unary_operator * expression
-                        | BinExpr of expression * binary_operator * expression
+    open AST
 
-    datatype statement = Skip
-                       | Abort
-                       | ExprStmt of expression
-                       | Seq of statement list
-                       | Assignment of AST.variable * expression
-                       | IfStmt of guarded_command list
-    withtype guarded_command = expression * statement
-
-    val == = fn(a, b) => BinExpr (a, AST.Eq, b)
+    val == = fn(a, b) => BinExpr (a, Eq, b)
     infix ==
 
-    val != = fn(a, b) => BinExpr (a, AST.Ne, b)
+    val != = fn(a, b) => BinExpr (a, Ne, b)
     infix !=
 
-    val || = fn (a, b) => BinExpr (a, AST.Or, b)
+    val || = fn (a, b) => BinExpr (a, Or, b)
     infix ||
 
-    val && = fn (a, b) => BinExpr (a, AST.And, b)
+    val && = fn (a, b) => BinExpr (a, And, b)
     infix &&
 
-    val --> = fn (a, b) => (UnaryExpr (AST.Not, a)) || b
+    val --> = fn (a, b) => (UnaryExpr (Not, a)) || b
     infix -->
 
     exception todo
-
-    fun gclToWpExpr expr = (case expr of
-        AST.Bool (b, _)             => Bool b
-      | AST.Int (i, _)              => Int i
-      | AST.VarExpr (v, _)          => VarExpr v
-      | AST.UnaryExpr (oper, r)     => UnaryExpr (oper, gclToWpExpr r)
-      | AST.BinExpr (l, oper, r, _) => BinExpr (gclToWpExpr l, oper, gclToWpExpr r)
-    )
-
-    fun gclToWpStmt stmt = (case stmt of
-        AST.Skip _                  => Skip
-      | AST.Abort _                 => Abort
-      | AST.ExprStmt expr           => ExprStmt (gclToWpExpr expr)
-      | AST.Seq s                   => Seq (map gclToWpStmt s)
-      | AST.Assignment (v, expr, _) => Assignment (v, gclToWpExpr expr)
-      | AST.IfStmt (gcList, _)      => IfStmt (map (fn (guard, cmd) => (gclToWpExpr guard, gclToWpStmt cmd)) gcList)
-    )
 
     fun substituteExpr var newExpr expr = let
         val substExpr = substituteExpr var newExpr

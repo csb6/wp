@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *)
 structure Check = struct
-    open AST
+    open Position_AST
 
     exception TypeError of string * pos
 
@@ -61,7 +61,7 @@ structure Check = struct
       | VarExpr _                 => IntType
       | UnaryExpr (oper, r)       =>
             if not (typeCheckOperand oper (typeCheckExpr r)) then
-                raise TypeError ("Operator in unary expression used with wrong type of operand", getExprPos r)
+                raise TypeError ("Operator in unary expression used with wrong type of operand", getExprData r)
             else
                 unaryOpType oper
       | BinExpr (l, oper, r, pos) => let
@@ -91,7 +91,7 @@ structure Check = struct
     )
     and typeCheckGuardedCommand (guard, cmd) =
         if typeCheckExpr guard <> BoolType then
-            raise TypeError ("Guard expressions must have type boolean", getExprPos guard)
+            raise TypeError ("Guard expressions must have type boolean", getExprData guard)
         else
             typeCheckStmt cmd
 

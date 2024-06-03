@@ -1,8 +1,12 @@
 Library
+    structure DecoratedAST
+    structure Position_AST
     structure AST
     structure Check
 is
     ast.sml
+    decorated_ast.sml
+    position_ast.sml
     check.sml
     $/smlnj-lib.cm
     $/basis.cm

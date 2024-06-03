@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *)
 
+structure PAST = Position_AST
+
 val symbols = ref AtomSet.empty
 
 fun addSymbol s = let
@@ -25,25 +27,25 @@ fun addSymbol s = let
      | SOME item => item
 end
 
-fun addVar s = AST.Var (addSymbol s)
+fun addVar s = PAST.Var (addSymbol s)
 
 fun toStmt [stmt]   = stmt
-  | toStmt stmtList = AST.Seq (rev stmtList)
+  | toStmt stmtList = PAST.Seq (rev stmtList)
 
 %%
 
 %name GCL
 %pure
 %verbose
-%pos AST.pos
+%pos PAST.pos
 
 %term PLUS | MINUS | TIMES | DIVIDE | EQUAL | NOT_EQUAL | AND | OR | NOT | ASSIGN | SEMICOLON | BAR
     | ARROW | COMMA | LPAREN | RPAREN | IF | END | BLOCK | SKIP | ABORT | INT of int | BOOL of bool
     | IDENT of string | EOF
 
-%nonterm START of AST.statement | STMT of AST.statement | ASSIGN_STMT of AST.statement | EXPR of AST.expression
-       | UNARYEXPR of AST.expression | BINEXPR of AST.expression | GUARDED_CMD of AST.guarded_command
-       | GUARDED_CMD_SET of AST.guarded_command list | STMT_LIST of AST.statement list
+%nonterm START of PAST.statement | STMT of PAST.statement | ASSIGN_STMT of PAST.statement | EXPR of PAST.expression
+       | UNARYEXPR of PAST.expression | BINEXPR of PAST.expression | GUARDED_CMD of PAST.guarded_command
+       | GUARDED_CMD_SET of PAST.guarded_command list | STMT_LIST of PAST.statement list
 
 %eop EOF
 %noshift EOF
@@ -62,15 +64,15 @@ START : STMT (STMT)
 
 (* Statements *)
 
-STMT : SKIP                   (AST.Skip defaultPos)
-     | ABORT                  (AST.Abort defaultPos)
-     | EXPR                   (AST.ExprStmt EXPR)
+STMT : SKIP                   (PAST.Skip defaultPos)
+     | ABORT                  (PAST.Abort defaultPos)
+     | EXPR                   (PAST.ExprStmt EXPR)
      | ASSIGN_STMT            (ASSIGN_STMT)
-     | IF GUARDED_CMD_SET END (AST.IfStmt (rev GUARDED_CMD_SET, IFleft))
+     | IF GUARDED_CMD_SET END (PAST.IfStmt (rev GUARDED_CMD_SET, IFleft))
      (* This might be removed later - added to make writing plain sequences easier *)
      | BLOCK STMT_LIST END    (toStmt STMT_LIST)
 
-ASSIGN_STMT : IDENT ASSIGN EXPR (AST.Assignment (addVar IDENT, EXPR, EXPRleft))
+ASSIGN_STMT : IDENT ASSIGN EXPR (PAST.Assignment (addVar IDENT, EXPR, EXPRleft))
 (* TODO: concurrent assignment *)
 
 STMT_LIST : STMT                     ([STMT])
@@ -85,20 +87,20 @@ GUARDED_CMD_SET : GUARDED_CMD                     ([GUARDED_CMD])
 
 (* Expressions *)
 
-EXPR : BOOL               (AST.Bool (BOOL, defaultPos))
-     | INT                (AST.Int (INT, defaultPos))
-     | IDENT              (AST.VarExpr (addVar IDENT, defaultPos))
+EXPR : BOOL               (PAST.Bool (BOOL, defaultPos))
+     | INT                (PAST.Int (INT, defaultPos))
+     | IDENT              (PAST.VarExpr (addVar IDENT, defaultPos))
      | UNARYEXPR          (UNARYEXPR)
      | BINEXPR            (BINEXPR)
      | LPAREN EXPR RPAREN (EXPR)
 
-UNARYEXPR : NOT EXPR      (AST.UnaryExpr (AST.Not, EXPR))
+UNARYEXPR : NOT EXPR      (PAST.UnaryExpr (PAST.Not, EXPR))
 
-BINEXPR : EXPR PLUS EXPR      (AST.BinExpr (EXPR1, AST.Plus, EXPR2, PLUSleft))
-        | EXPR MINUS EXPR     (AST.BinExpr (EXPR1, AST.Minus, EXPR2, MINUSleft))
-        | EXPR TIMES EXPR     (AST.BinExpr (EXPR1, AST.Mult, EXPR2, TIMESleft))
-        | EXPR DIVIDE EXPR    (AST.BinExpr (EXPR1, AST.Div, EXPR2, DIVIDEleft))
-        | EXPR EQUAL EXPR     (AST.BinExpr (EXPR1, AST.Eq, EXPR2, EQUALleft))
-        | EXPR NOT_EQUAL EXPR (AST.BinExpr (EXPR1, AST.Ne, EXPR2, NOT_EQUALleft))
-        | EXPR AND EXPR       (AST.BinExpr (EXPR1, AST.And, EXPR2, ANDleft))
-        | EXPR OR EXPR        (AST.BinExpr (EXPR1, AST.Or, EXPR2, ORleft))
+BINEXPR : EXPR PLUS EXPR      (PAST.BinExpr (EXPR1, PAST.Plus, EXPR2, PLUSleft))
+        | EXPR MINUS EXPR     (PAST.BinExpr (EXPR1, PAST.Minus, EXPR2, MINUSleft))
+        | EXPR TIMES EXPR     (PAST.BinExpr (EXPR1, PAST.Mult, EXPR2, TIMESleft))
+        | EXPR DIVIDE EXPR    (PAST.BinExpr (EXPR1, PAST.Div, EXPR2, DIVIDEleft))
+        | EXPR EQUAL EXPR     (PAST.BinExpr (EXPR1, PAST.Eq, EXPR2, EQUALleft))
+        | EXPR NOT_EQUAL EXPR (PAST.BinExpr (EXPR1, PAST.Ne, EXPR2, NOT_EQUALleft))
+        | EXPR AND EXPR       (PAST.BinExpr (EXPR1, PAST.And, EXPR2, ANDleft))
+        | EXPR OR EXPR        (PAST.BinExpr (EXPR1, PAST.Or, EXPR2, ORleft))
