@@ -72,6 +72,7 @@ end
 "if" => (Tokens.IF (!currLine, !currLine));
 "end" => (Tokens.END (!currLine, !currLine));
 "block" => (Tokens.BLOCK (!currLine, !currLine));
+"loop" => (Tokens.LOOP (!currLine, !currLine));
 
 [a-zA-Z][a-zA-Z_0-9]* => (Tokens.IDENT (yytext, !currLine, !currLine));
 

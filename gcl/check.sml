@@ -88,6 +88,7 @@ structure Check = struct
             else
                 ()
       | IfStmt (gcList, _)        => List.app typeCheckGuardedCommand gcList
+      | LoopStmt (gcList, _)      => List.app typeCheckGuardedCommand gcList
     )
     and typeCheckGuardedCommand (guard, cmd) =
         if typeCheckExpr guard <> BoolType then

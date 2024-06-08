@@ -38,6 +38,7 @@ signature TOKENS = sig
     val IF : linenum * linenum -> token
     val END : linenum * linenum -> token
     val BLOCK : linenum * linenum -> token
+    val LOOP : linenum * linenum -> token
     val SKIP : linenum * linenum -> token
     val ABORT : linenum * linenum -> token
     val INT : linenum * linenum * int -> token

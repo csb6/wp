@@ -29,18 +29,18 @@ structure AST = struct
         fun getVarName (Var a) = Atom.toString a
 
         fun unaryOpToString oper = (case oper of
-            Not => "not"
+            Not => "not "
         )
 
         fun binOpToString oper = (case oper of
-            Plus  => "+"
-          | Minus => "-"
-          | Mult  => "*"
-          | Div   => "/"
-          | Eq    => "="
-          | Ne    => "!="
-          | And   => "and"
-          | Or    => "or"
+            Plus  => " + "
+          | Minus => " - "
+          | Mult  => " * "
+          | Div   => " / "
+          | Eq    => " = "
+          | Ne    => " != "
+          | And   => " and "
+          | Or    => " or "
         )
     end (* structure Basic_Types *)
     open Basic_Types
@@ -50,18 +50,16 @@ structure AST = struct
                         | VarExpr of variable
                         | UnaryExpr of unary_operator * expression
                         | BinExpr of expression * binary_operator * expression
-
-    datatype statement = Skip
-                       | Abort
-                       | ExprStmt of expression
-                       | Seq of statement list
-                       | Assignment of variable * expression
-                       | IfStmt of guarded_command list
+                        (* Sequence of k IfStmts with a final postcondition, where k >= 0 *)
+                        | IndefSeq of guarded_command list * expression
+    and       statement = Skip
+                        | Abort
+                        | ExprStmt of expression
+                        | Seq of statement list
+                        | Assignment of variable * expression
+                        | IfStmt of guarded_command list
+                        | LoopStmt of guarded_command list
     withtype guarded_command = expression * statement
-
-    (* TODO: consider using expression's pos as its canonical position and extending
-    Assignment to hold a variable * expression * pos list. That way the line numbers align
-    with the right-hand side expression *)
 
     fun joinStr sep lst = let
         fun join lst' soFar = (case lst' of
@@ -77,17 +75,18 @@ structure AST = struct
         Bool b               => if b then "true" else "false"
       | Int i                => Int.toString i
       | VarExpr v            => getVarName v
-      | UnaryExpr (oper, e)  => (unaryOpToString oper) ^ " " ^ (exprToString e)
+      | UnaryExpr (oper, e)  => (unaryOpToString oper) ^ (exprToString e)
       | BinExpr (l, oper, r) => "(" ^ (exprToString l) ^ (binOpToString oper) ^ (exprToString r) ^ ")"
+      | IndefSeq (gcList, r) => "repeat " ^ (concat (map gcToString gcList)) ^ " until (" ^ (exprToString r) ^ ")"
     )
-
-    fun stmtToString stmt = (case stmt of
+    and stmtToString stmt = (case stmt of
         Skip                 => "skip"
       | Abort                => "abort"
       | ExprStmt expr        => exprToString expr
       | Seq s                => (joinStr ";\n" (map stmtToString s)) ^ "\n"
       | Assignment (v, expr) => (getVarName v) ^ " := " ^ (exprToString expr)
       | IfStmt gcList        => "if\n" ^ (concat (map gcToString gcList)) ^ "end\n"
+      | LoopStmt gcList      => "loop\n" ^ (concat (map gcToString gcList)) ^ "end\n"
     )
     and gcToString (guard, stmt) =
         (exprToString guard) ^ " -> " ^ (stmtToString stmt) ^ "\n"

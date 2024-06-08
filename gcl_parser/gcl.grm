@@ -40,8 +40,8 @@ fun toStmt [stmt]   = stmt
 %pos PAST.pos
 
 %term PLUS | MINUS | TIMES | DIVIDE | EQUAL | NOT_EQUAL | AND | OR | NOT | ASSIGN | SEMICOLON | BAR
-    | ARROW | COMMA | LPAREN | RPAREN | IF | END | BLOCK | SKIP | ABORT | INT of int | BOOL of bool
-    | IDENT of string | EOF
+    | ARROW | COMMA | LPAREN | RPAREN | IF | END | BLOCK | LOOP | SKIP | ABORT | INT of int
+    | BOOL of bool | IDENT of string | EOF
 
 %nonterm START of PAST.statement | STMT of PAST.statement | ASSIGN_STMT of PAST.statement | EXPR of PAST.expression
        | UNARYEXPR of PAST.expression | BINEXPR of PAST.expression | GUARDED_CMD of PAST.guarded_command
@@ -64,13 +64,14 @@ START : STMT (STMT)
 
 (* Statements *)
 
-STMT : SKIP                   (PAST.Skip defaultPos)
-     | ABORT                  (PAST.Abort defaultPos)
-     | EXPR                   (PAST.ExprStmt EXPR)
-     | ASSIGN_STMT            (ASSIGN_STMT)
-     | IF GUARDED_CMD_SET END (PAST.IfStmt (rev GUARDED_CMD_SET, IFleft))
+STMT : SKIP                     (PAST.Skip defaultPos)
+     | ABORT                    (PAST.Abort defaultPos)
+     | EXPR                     (PAST.ExprStmt EXPR)
+     | ASSIGN_STMT              (ASSIGN_STMT)
+     | IF GUARDED_CMD_SET END   (PAST.IfStmt (rev GUARDED_CMD_SET, IFleft))
      (* This might be removed later - added to make writing plain sequences easier *)
-     | BLOCK STMT_LIST END    (toStmt STMT_LIST)
+     | BLOCK STMT_LIST END      (toStmt STMT_LIST)
+     | LOOP GUARDED_CMD_SET END (PAST.LoopStmt (rev GUARDED_CMD_SET, LOOPleft))
 
 ASSIGN_STMT : IDENT ASSIGN EXPR (PAST.Assignment (addVar IDENT, EXPR, EXPRleft))
 (* TODO: concurrent assignment *)

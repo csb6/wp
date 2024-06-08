@@ -28,6 +28,7 @@ structure DecoratedAST = struct
                           | Seq of 'a statement list
                           | Assignment of AST.variable * 'a expression * 'a
                           | IfStmt of 'a guarded_command list * 'a
+                          | LoopStmt of 'a guarded_command list * 'a
     withtype 'a guarded_command = 'a expression * 'a statement
 
     (* Convert to AST.expression *)
@@ -47,6 +48,7 @@ structure DecoratedAST = struct
       | Seq s                   => AST.Seq (map stripStmt s)
       | Assignment (v, expr, _) => AST.Assignment (v, stripExpr expr)
       | IfStmt (gcList, _)      => AST.IfStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
+      | LoopStmt (gcList, _)    => AST.LoopStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
     )
 
     fun getExprData expr = (case expr of
@@ -65,6 +67,7 @@ structure DecoratedAST = struct
       | Seq []                  => raise Domain (* Parsing should guarantee [] case does not occur *)
       | Assignment (_, _, data) => data
       | IfStmt (_, data)        => data
+      | LoopStmt (_, data)      => data
     )
 
     fun exprToString expr = AST.exprToString (stripExpr expr)
