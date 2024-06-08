@@ -42,12 +42,12 @@ structure WP = struct
         val substGC = substituteGC var newExpr
     in
         case expr of
-            Bool b               => Bool b
-          | Int i                => Int i
-          | VarExpr v            => if AST.sameVar v var then newExpr else VarExpr v
-          | UnaryExpr (oper, r)  => UnaryExpr (oper, substExpr r)
-          | BinExpr (l, oper, r) => BinExpr (substExpr l, oper, substExpr r)
-          | IndefSeq (gcList, r) => IndefSeq (map substGC gcList, substExpr r)
+            Bool b                 => Bool b
+          | Int i                  => Int i
+          | VarExpr v              => if AST.sameVar v var then newExpr else VarExpr v
+          | UnaryExpr (oper, r)    => UnaryExpr (oper, substExpr r)
+          | BinExpr (l, oper, r)   => BinExpr (substExpr l, oper, substExpr r)
+          | WPIndefSeq (gcList, r) => WPIndefSeq (map substGC gcList, substExpr r)
     end
     and substituteStmt var newExpr stmt = let
         val substStmt = substituteStmt var newExpr
@@ -79,7 +79,7 @@ structure WP = struct
         )
         fun wpLoopStmt gcList r = (case gcList of
             (g0, c0)::gcx =>
-                IndefSeq (
+                WPIndefSeq (
                     (g0, c0)::gcx,                                     (* k repetitions of if-statement *)
                      r && notExpr (foldl (op ||) g0 (map firstEl gcx)) (* final postcondition (when k = 0) *)
                 )

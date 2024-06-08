@@ -50,8 +50,8 @@ structure AST = struct
                         | VarExpr of variable
                         | UnaryExpr of unary_operator * expression
                         | BinExpr of expression * binary_operator * expression
-                        (* Sequence of k IfStmts with a final postcondition, where k >= 0 *)
-                        | IndefSeq of guarded_command list * expression
+                        (* WP of sequence of k IfStmts with a final postcondition, where k >= 0 *)
+                        | WPIndefSeq of guarded_command list * expression
     and       statement = Skip
                         | Abort
                         | ExprStmt of expression
@@ -72,21 +72,21 @@ structure AST = struct
     end
 
     fun exprToString expr = (case expr of
-        Bool b               => if b then "true" else "false"
-      | Int i                => Int.toString i
-      | VarExpr v            => getVarName v
-      | UnaryExpr (oper, e)  => (unaryOpToString oper) ^ (exprToString e)
-      | BinExpr (l, oper, r) => "(" ^ (exprToString l) ^ (binOpToString oper) ^ (exprToString r) ^ ")"
-      | IndefSeq (gcList, r) => "repeat " ^ (concat (map gcToString gcList)) ^ " until (" ^ (exprToString r) ^ ")"
+        Bool b                 => if b then "true" else "false"
+      | Int i                  => Int.toString i
+      | VarExpr v              => getVarName v
+      | UnaryExpr (oper, e)    => (unaryOpToString oper) ^ (exprToString e)
+      | BinExpr (l, oper, r)   => "(" ^ (exprToString l) ^ (binOpToString oper) ^ (exprToString r) ^ ")"
+      | WPIndefSeq (gcList, r) => "wp(repeat " ^ (concat (map gcToString gcList)) ^ " until (" ^ (exprToString r) ^ "))"
     )
     and stmtToString stmt = (case stmt of
         Skip                 => "skip"
       | Abort                => "abort"
       | ExprStmt expr        => exprToString expr
-      | Seq s                => (joinStr ";\n" (map stmtToString s)) ^ "\n"
+      | Seq s                => (joinStr ";\n" (map stmtToString s))
       | Assignment (v, expr) => (getVarName v) ^ " := " ^ (exprToString expr)
-      | IfStmt gcList        => "if\n" ^ (concat (map gcToString gcList)) ^ "end\n"
-      | LoopStmt gcList      => "loop\n" ^ (concat (map gcToString gcList)) ^ "end\n"
+      | IfStmt gcList        => "if\n" ^ (concat (map gcToString gcList)) ^ "\nend\n"
+      | LoopStmt gcList      => "loop\n" ^ (concat (map gcToString gcList)) ^ "\nend\n"
     )
     and gcToString (guard, stmt) =
         (exprToString guard) ^ " -> " ^ (stmtToString stmt) ^ "\n"
