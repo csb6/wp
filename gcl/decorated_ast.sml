@@ -26,7 +26,7 @@ structure DecoratedAST = struct
                           | Abort of 'a
                           | ExprStmt of 'a expression
                           | Seq of 'a statement list
-                          | Assignment of AST.variable * 'a expression * 'a
+                          | Assignment of (AST.variable * 'a expression) list * 'a
                           | IfStmt of 'a guarded_command list * 'a
                           | LoopStmt of 'a guarded_command list * 'a
     withtype 'a guarded_command = 'a expression * 'a statement
@@ -42,13 +42,13 @@ structure DecoratedAST = struct
 
     (* Convert to AST.statement *)
     fun stripStmt stmt = (case stmt of
-        Skip _                  => AST.Skip
-      | Abort _                 => AST.Abort
-      | ExprStmt expr           => AST.ExprStmt (stripExpr expr)
-      | Seq s                   => AST.Seq (map stripStmt s)
-      | Assignment (v, expr, _) => AST.Assignment (v, stripExpr expr)
-      | IfStmt (gcList, _)      => AST.IfStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
-      | LoopStmt (gcList, _)    => AST.LoopStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
+        Skip _                    => AST.Skip
+      | Abort _                   => AST.Abort
+      | ExprStmt expr             => AST.ExprStmt (stripExpr expr)
+      | Seq s                     => AST.Seq (map stripStmt s)
+      | Assignment (assgnList, _) => AST.Assignment (map (fn (v, e) => (v, stripExpr e)) assgnList)
+      | IfStmt (gcList, _)        => AST.IfStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
+      | LoopStmt (gcList, _)      => AST.LoopStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
     )
 
     fun getExprData expr = (case expr of
@@ -65,7 +65,7 @@ structure DecoratedAST = struct
       | ExprStmt expr           => getExprData expr
       | Seq (s1::_)             => getStmtData s1
       | Seq []                  => raise Domain (* Parsing should guarantee [] case does not occur *)
-      | Assignment (_, _, data) => data
+      | Assignment (_, data)    => data
       | IfStmt (_, data)        => data
       | LoopStmt (_, data)      => data
     )

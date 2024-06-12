@@ -59,7 +59,7 @@ structure WP = struct
           | Abort                => Abort
           | ExprStmt expr        => ExprStmt (substExpr expr)
           | Seq s                => Seq (map substStmt s)
-          | Assignment (v, expr) => Assignment (v, substExpr expr)
+          | Assignment assgnList => Assignment (map (fn (v, e) => (v, substExpr e)) assgnList)
           | IfStmt gcList        => IfStmt   (map substGC gcList)
           | LoopStmt gcList      => LoopStmt (map substGC gcList)
     end
@@ -91,7 +91,7 @@ structure WP = struct
           | (Abort,                _)          => Bool false
           | (Skip,                 r)          => r
           | (ExprStmt _,           r)          => r
-          | (Assignment (v, expr), r)          => substituteExpr v expr r
+          | (Assignment assgnList, r)          => foldl (fn ((v, e), r') => substituteExpr v e r') r assgnList
           | (Seq s,                r)          => wpSeqStmt s r
           | (IfStmt gcList,        r)          => wpIfStmt gcList r
           | (LoopStmt gcList,      r)          => wpLoopStmt gcList r

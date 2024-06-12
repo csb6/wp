@@ -56,7 +56,7 @@ structure AST = struct
                         | Abort
                         | ExprStmt of expression
                         | Seq of statement list
-                        | Assignment of variable * expression
+                        | Assignment of (variable * expression) list
                         | IfStmt of guarded_command list
                         | LoopStmt of guarded_command list
     withtype guarded_command = expression * statement
@@ -84,7 +84,9 @@ structure AST = struct
       | Abort                => "abort"
       | ExprStmt expr        => exprToString expr
       | Seq s                => (joinStr ";\n" (map stmtToString s))
-      | Assignment (v, expr) => (getVarName v) ^ " := " ^ (exprToString expr)
+      | Assignment assgnList =>
+            (joinStr ", " (map (fn (v, _) => getVarName v) assgnList)) ^ " := "
+          ^ (joinStr ", " (map (fn (_, e) => exprToString e) assgnList))
       | IfStmt gcList        => "if\n" ^ (concat (map gcToString gcList)) ^ "\nend\n"
       | LoopStmt gcList      => "loop\n" ^ (concat (map gcToString gcList)) ^ "\nend\n"
     )

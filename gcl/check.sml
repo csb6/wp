@@ -78,18 +78,19 @@ structure Check = struct
     )
 
     fun typeCheckStmt stmt = (case stmt of
-        Skip _                    => ()
-      | Abort _                   => ()
-      | ExprStmt expr             => (typeCheckExpr expr; ())
-      | Seq s                     => List.app typeCheckStmt s
-      | Assignment (_, expr, pos) =>
-            if typeCheckExpr expr <> IntType then
-                raise TypeError ("Attempted to assign boolean expression to integer variable", pos)
-            else
-                ()
-      | IfStmt (gcList, _)        => List.app typeCheckGuardedCommand gcList
-      | LoopStmt (gcList, _)      => List.app typeCheckGuardedCommand gcList
+        Skip _                     => ()
+      | Abort _                    => ()
+      | ExprStmt expr              => (typeCheckExpr expr; ())
+      | Seq s                      => List.app typeCheckStmt s
+      | Assignment (assignList, _) => List.app typeCheckAssignment assignList
+      | IfStmt (gcList, _)         => List.app typeCheckGuardedCommand gcList
+      | LoopStmt (gcList, _)       => List.app typeCheckGuardedCommand gcList
     )
+    and typeCheckAssignment (_, expr) =
+        if typeCheckExpr expr <> IntType then
+            raise TypeError ("Attempted to assign boolean expression to integer variable", getExprData expr)
+        else
+            ()
     and typeCheckGuardedCommand (guard, cmd) =
         if typeCheckExpr guard <> BoolType then
             raise TypeError ("Guard expressions must have type boolean", getExprData guard)

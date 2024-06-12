@@ -43,9 +43,10 @@ fun toStmt [stmt]   = stmt
     | ARROW | COMMA | LPAREN | RPAREN | IF | END | BLOCK | LOOP | SKIP | ABORT | INT of int
     | BOOL of bool | IDENT of string | EOF
 
-%nonterm START of PAST.statement | STMT of PAST.statement | ASSIGN_STMT of PAST.statement | EXPR of PAST.expression
-       | UNARYEXPR of PAST.expression | BINEXPR of PAST.expression | GUARDED_CMD of PAST.guarded_command
-       | GUARDED_CMD_SET of PAST.guarded_command list | STMT_LIST of PAST.statement list
+%nonterm START of PAST.statement | STMT of PAST.statement | ASSIGN_STMT of (PAST.variable * PAST.expression) list
+       | EXPR of PAST.expression | UNARYEXPR of PAST.expression | BINEXPR of PAST.expression
+       | GUARDED_CMD of PAST.guarded_command | GUARDED_CMD_SET of PAST.guarded_command list
+       | STMT_LIST of PAST.statement list
 
 %eop EOF
 %noshift EOF
@@ -67,14 +68,14 @@ START : STMT (STMT)
 STMT : SKIP                     (PAST.Skip defaultPos)
      | ABORT                    (PAST.Abort defaultPos)
      | EXPR                     (PAST.ExprStmt EXPR)
-     | ASSIGN_STMT              (ASSIGN_STMT)
+     | ASSIGN_STMT              (PAST.Assignment (ASSIGN_STMT, ASSIGN_STMTleft))
      | IF GUARDED_CMD_SET END   (PAST.IfStmt (rev GUARDED_CMD_SET, IFleft))
      (* This might be removed later - added to make writing plain sequences easier *)
      | BLOCK STMT_LIST END      (toStmt STMT_LIST)
      | LOOP GUARDED_CMD_SET END (PAST.LoopStmt (rev GUARDED_CMD_SET, LOOPleft))
 
-ASSIGN_STMT : IDENT ASSIGN EXPR (PAST.Assignment (addVar IDENT, EXPR, EXPRleft))
-(* TODO: concurrent assignment *)
+ASSIGN_STMT : IDENT ASSIGN EXPR                  ([(addVar IDENT, EXPR)])
+            | IDENT COMMA ASSIGN_STMT COMMA EXPR ((addVar IDENT, EXPR)::ASSIGN_STMT)
 
 STMT_LIST : STMT                     ([STMT])
           | STMT_LIST SEMICOLON STMT (STMT::STMT_LIST)
