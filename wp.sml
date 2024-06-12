@@ -58,33 +58,30 @@ structure WP = struct
             Skip                 => Skip
           | Abort                => Abort
           | ExprStmt expr        => ExprStmt (substExpr expr)
-          | Seq s                => Seq (map substStmt s)
+          | Seq (s0, sx)         => Seq (substStmt s0, map substStmt sx)
           | Assignment assgnList => Assignment (map (fn (v, e) => (v, substExpr e)) assgnList)
-          | IfStmt gcList        => IfStmt   (map substGC gcList)
-          | LoopStmt gcList      => LoopStmt (map substGC gcList)
+          | IfStmt (gc0, gcx)    => IfStmt   (substGC gc0, map substGC gcx)
+          | LoopStmt (gc0, gcx)  => LoopStmt (substGC gc0, map substGC gcx)
     end
     and substituteGC var newExpr (guard, cmd) =
         (substituteExpr var newExpr guard, substituteStmt var newExpr cmd)
 
     fun wp stmt postCond = let
-        fun wpSeqStmt s r = (case rev s of
-            s0::sx => foldl (fn (s', r') => wp s' r') (wp s0 r) sx
-          | []     => raise Domain
-        )
-        fun wpIfStmt gcList r = (case gcList of
-            (g0, c0)::gcx =>
-                foldl (op ||)  g0              (map  firstEl                    gcx) (* At least one guard g_x is true *)
-             && foldl (op &&) (g0 --> wp c0 r) (map (fn (g, c) => g --> wp c r) gcx) (* g_x -> wp(c_x, r) *)
-          | []            => raise Domain
-        )
-        fun wpLoopStmt gcList r = (case gcList of
-            (g0, c0)::gcx =>
-                WPIndefSeq (
-                    (g0, c0)::gcx,                                     (* k repetitions of if-statement *)
-                     r && notExpr (foldl (op ||) g0 (map firstEl gcx)) (* final postcondition (when k = 0) *)
-                )
-          | []            => raise Domain
-        )
+        fun wpSeqStmt s r = let
+            val (s0, sx) = AST.revNonEmpty s
+        in
+            foldl (fn (s', r') => wp s' r') (wp s0 r) sx
+        end
+
+        fun wpIfStmt ((g0, c0), gcx) r =
+            foldl (op ||)  g0              (map  firstEl                    gcx) (* At least one guard g_x is true *)
+         && foldl (op &&) (g0 --> wp c0 r) (map (fn (g, c) => g --> wp c r) gcx) (* g_x -> wp(c_x, r) *)
+
+        fun wpLoopStmt ((g0, c0), gcx) r =
+            WPIndefSeq (
+                (g0, c0)::gcx,                                     (* k repetitions of if-statement *)
+                 r && notExpr (foldl (op ||) g0 (map firstEl gcx)) (* final postcondition (when k = 0) *)
+            )
     in
         case (stmt, postCond) of
             (_,                    Bool false) => Bool false

@@ -45,6 +45,13 @@ structure AST = struct
     end (* structure Basic_Types *)
     open Basic_Types
 
+    type 'a nonempty_list = 'a * 'a list
+
+    fun revNonEmpty (l0, lx) = (case rev (l0::lx) of
+        l0'::lx' => (l0', lx')
+      | []       => raise Domain
+    )
+
     datatype expression = Bool of bool
                         | Int of int
                         | VarExpr of variable
@@ -55,10 +62,10 @@ structure AST = struct
     and       statement = Skip
                         | Abort
                         | ExprStmt of expression
-                        | Seq of statement list
+                        | Seq of statement nonempty_list
                         | Assignment of (variable * expression) list
-                        | IfStmt of guarded_command list
-                        | LoopStmt of guarded_command list
+                        | IfStmt of guarded_command nonempty_list
+                        | LoopStmt of guarded_command nonempty_list
     withtype guarded_command = expression * statement
 
     fun joinStr sep lst = let
@@ -83,12 +90,12 @@ structure AST = struct
         Skip                 => "skip"
       | Abort                => "abort"
       | ExprStmt expr        => exprToString expr
-      | Seq s                => (joinStr ";\n" (map stmtToString s))
+      | Seq (s0, sx)         => joinStr ";\n" (map stmtToString (s0::sx))
       | Assignment assgnList =>
             (joinStr ", " (map (fn (v, _) => getVarName v) assgnList)) ^ " := "
           ^ (joinStr ", " (map (fn (_, e) => exprToString e) assgnList))
-      | IfStmt gcList        => "if\n" ^ (concat (map gcToString gcList)) ^ "\nend\n"
-      | LoopStmt gcList      => "loop\n" ^ (concat (map gcToString gcList)) ^ "\nend\n"
+      | IfStmt (gc0, gcx)    => "if\n" ^ (concat (map gcToString (gc0::gcx))) ^ "\nend\n"
+      | LoopStmt (gc0, gcx)  => "loop\n" ^ (concat (map gcToString (gc0::gcx))) ^ "\nend\n"
     )
     and gcToString (guard, stmt) =
         (exprToString guard) ^ " -> " ^ (stmtToString stmt) ^ "\n"

@@ -25,10 +25,10 @@ structure DecoratedAST = struct
     datatype 'a statement = Skip of 'a
                           | Abort of 'a
                           | ExprStmt of 'a expression
-                          | Seq of 'a statement list
+                          | Seq of 'a statement AST.nonempty_list
                           | Assignment of (AST.variable * 'a expression) list * 'a
-                          | IfStmt of 'a guarded_command list * 'a
-                          | LoopStmt of 'a guarded_command list * 'a
+                          | IfStmt of 'a guarded_command AST.nonempty_list * 'a
+                          | LoopStmt of 'a guarded_command AST.nonempty_list * 'a
     withtype 'a guarded_command = 'a expression * 'a statement
 
     (* Convert to AST.expression *)
@@ -45,11 +45,12 @@ structure DecoratedAST = struct
         Skip _                    => AST.Skip
       | Abort _                   => AST.Abort
       | ExprStmt expr             => AST.ExprStmt (stripExpr expr)
-      | Seq s                     => AST.Seq (map stripStmt s)
+      | Seq (s0, sx)              => AST.Seq (stripStmt s0, map stripStmt sx)
       | Assignment (assgnList, _) => AST.Assignment (map (fn (v, e) => (v, stripExpr e)) assgnList)
-      | IfStmt (gcList, _)        => AST.IfStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
-      | LoopStmt (gcList, _)      => AST.LoopStmt (map (fn (guard, cmd) => (stripExpr guard, stripStmt cmd)) gcList)
+      | IfStmt ((gc0, gcx), _)    => AST.IfStmt (stripGC gc0, map stripGC gcx)
+      | LoopStmt ((gc0, gcx), _)  => AST.LoopStmt (stripGC gc0, map stripGC gcx)
     )
+    and stripGC (guard, cmd) = (stripExpr guard, stripStmt cmd)
 
     fun getExprData expr = (case expr of
         Bool (_, data)          => data
@@ -63,8 +64,7 @@ structure DecoratedAST = struct
         Skip data               => data
       | Abort data              => data
       | ExprStmt expr           => getExprData expr
-      | Seq (s1::_)             => getStmtData s1
-      | Seq []                  => raise Domain (* Parsing should guarantee [] case does not occur *)
+      | Seq (s0, _)             => getStmtData s0
       | Assignment (_, data)    => data
       | IfStmt (_, data)        => data
       | LoopStmt (_, data)      => data

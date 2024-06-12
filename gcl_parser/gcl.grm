@@ -29,8 +29,16 @@ end
 
 fun addVar s = PAST.Var (addSymbol s)
 
-fun toStmt [stmt]   = stmt
-  | toStmt stmtList = PAST.Seq (rev stmtList)
+fun toStmt s = (case rev s of
+    []     => raise Domain (* unreachable *)
+  | [stmt] => stmt
+  | s0::sx => PAST.Seq (s0, sx)
+)
+
+fun toGCList gcList = (case rev gcList of
+    []       => raise Domain (* unreachable *)
+  | gc0::gcx => (gc0, gcx)
+)
 
 %%
 
@@ -69,10 +77,10 @@ STMT : SKIP                     (PAST.Skip defaultPos)
      | ABORT                    (PAST.Abort defaultPos)
      | EXPR                     (PAST.ExprStmt EXPR)
      | ASSIGN_STMT              (PAST.Assignment (ASSIGN_STMT, ASSIGN_STMTleft))
-     | IF GUARDED_CMD_SET END   (PAST.IfStmt (rev GUARDED_CMD_SET, IFleft))
+     | IF GUARDED_CMD_SET END   (PAST.IfStmt (toGCList GUARDED_CMD_SET, IFleft))
      (* This might be removed later - added to make writing plain sequences easier *)
      | BLOCK STMT_LIST END      (toStmt STMT_LIST)
-     | LOOP GUARDED_CMD_SET END (PAST.LoopStmt (rev GUARDED_CMD_SET, LOOPleft))
+     | LOOP GUARDED_CMD_SET END (PAST.LoopStmt (toGCList GUARDED_CMD_SET, LOOPleft))
 
 ASSIGN_STMT : IDENT ASSIGN EXPR                  ([(addVar IDENT, EXPR)])
             | IDENT COMMA ASSIGN_STMT COMMA EXPR ((addVar IDENT, EXPR)::ASSIGN_STMT)

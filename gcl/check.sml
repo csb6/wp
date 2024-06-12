@@ -81,10 +81,10 @@ structure Check = struct
         Skip _                     => ()
       | Abort _                    => ()
       | ExprStmt expr              => (typeCheckExpr expr; ())
-      | Seq s                      => List.app typeCheckStmt s
+      | Seq (s0, sx)               => List.app typeCheckStmt (s0::sx)
       | Assignment (assignList, _) => List.app typeCheckAssignment assignList
-      | IfStmt (gcList, _)         => List.app typeCheckGuardedCommand gcList
-      | LoopStmt (gcList, _)       => List.app typeCheckGuardedCommand gcList
+      | IfStmt ((gc0, gcx), _)     => List.app typeCheckGuardedCommand (gc0::gcx)
+      | LoopStmt ((gc0, gcx), _)   => List.app typeCheckGuardedCommand (gc0::gcx)
     )
     and typeCheckAssignment (_, expr) =
         if typeCheckExpr expr <> IntType then
