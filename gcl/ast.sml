@@ -45,13 +45,6 @@ structure AST = struct
     end (* structure Basic_Types *)
     open Basic_Types
 
-    type 'a nonempty_list = 'a * 'a list
-
-    fun revNonEmpty (l0, lx) = (case rev (l0::lx) of
-        l0'::lx' => (l0', lx')
-      | []       => raise Domain
-    )
-
     datatype expression = Bool of bool
                         | Int of int
                         | VarExpr of variable
@@ -62,21 +55,11 @@ structure AST = struct
     and       statement = Skip
                         | Abort
                         | ExprStmt of expression
-                        | Seq of statement nonempty_list
+                        | Seq of statement List_Utils.nonempty_list
                         | Assignment of (variable * expression) list
-                        | IfStmt of guarded_command nonempty_list
-                        | LoopStmt of guarded_command nonempty_list
+                        | IfStmt of guarded_command List_Utils.nonempty_list
+                        | LoopStmt of guarded_command List_Utils.nonempty_list
     withtype guarded_command = expression * statement
-
-    fun joinStr sep lst = let
-        fun join lst' soFar = (case lst' of
-            []         => soFar
-          | [head]     => soFar ^ head
-          | head::tail => join tail (soFar ^ head ^ sep)
-        )
-    in
-        join lst ""
-    end
 
     fun exprToString expr = (case expr of
         Bool b                 => if b then "true" else "false"
@@ -90,10 +73,10 @@ structure AST = struct
         Skip                 => "skip"
       | Abort                => "abort"
       | ExprStmt expr        => exprToString expr
-      | Seq (s0, sx)         => joinStr ";\n" (map stmtToString (s0::sx))
+      | Seq (s0, sx)         => String_Utils.join ";\n" (map stmtToString (s0::sx))
       | Assignment assgnList =>
-            (joinStr ", " (map (fn (v, _) => getVarName v) assgnList)) ^ " := "
-          ^ (joinStr ", " (map (fn (_, e) => exprToString e) assgnList))
+            (String_Utils.join ", " (map (fn (v, _) => getVarName v) assgnList)) ^ " := "
+          ^ (String_Utils.join ", " (map (fn (_, e) => exprToString e) assgnList))
       | IfStmt (gc0, gcx)    => "if\n" ^ (concat (map gcToString (gc0::gcx))) ^ "\nend\n"
       | LoopStmt (gc0, gcx)  => "loop\n" ^ (concat (map gcToString (gc0::gcx))) ^ "\nend\n"
     )

@@ -10,5 +10,6 @@ is
     decorated_ast.sml
     position_ast.sml
     check.sml
+    ../utils/utils.cm
     $/smlnj-lib.cm
     $/basis.cm

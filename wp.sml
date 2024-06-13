@@ -68,7 +68,7 @@ structure WP = struct
 
     fun wp stmt postCond = let
         fun wpSeqStmt s r = let
-            val (s0, sx) = AST.revNonEmpty s
+            val (s0, sx) = List_Utils.revNonEmpty s
         in
             foldl (fn (s', r') => wp s' r') (wp s0 r) sx
         end

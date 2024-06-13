@@ -3,4 +3,5 @@ Library
 is
     wp.sml
     gcl/gcl.cm
+    utils/utils.cm
     $/basis.cm

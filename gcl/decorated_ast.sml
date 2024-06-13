@@ -25,10 +25,10 @@ structure DecoratedAST = struct
     datatype 'a statement = Skip of 'a
                           | Abort of 'a
                           | ExprStmt of 'a expression
-                          | Seq of 'a statement AST.nonempty_list
+                          | Seq of 'a statement List_Utils.nonempty_list
                           | Assignment of (AST.variable * 'a expression) list * 'a
-                          | IfStmt of 'a guarded_command AST.nonempty_list * 'a
-                          | LoopStmt of 'a guarded_command AST.nonempty_list * 'a
+                          | IfStmt of 'a guarded_command List_Utils.nonempty_list * 'a
+                          | LoopStmt of 'a guarded_command List_Utils.nonempty_list * 'a
     withtype 'a guarded_command = 'a expression * 'a statement
 
     (* Convert to AST.expression *)

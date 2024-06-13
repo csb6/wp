@@ -1,0 +1,7 @@
+Library
+    structure String_Utils
+    structure List_Utils
+is
+    string_utils.sml
+    list_utils.sml
+    $/basis.cm
