@@ -36,8 +36,9 @@ structure Driver = struct
         end
     in
         SOME (run()) handle
-            GCLParser.LexerError (errMsg, pos) => (printFileError pos errMsg; NONE)
-          | GCLParser.ParseError               => (print "Parsing failed\n"; NONE)
-          | Check.TypeError (errMsg, pos)      => (printFileError pos errMsg; NONE)
+            GCLParser.LexerError (errMsg, pos)          => (printFileError pos errMsg; NONE)
+          | GCLParser.ParseError                        => (print "Parsing failed\n"; NONE)
+          | Position_AST.CustomParseError (errMsg, pos) => (printFileError pos errMsg; NONE)
+          | Check.TypeError (errMsg, pos)               => (printFileError pos errMsg; NONE)
     end
 end (* structure Driver *)

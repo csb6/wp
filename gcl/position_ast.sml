@@ -23,6 +23,8 @@ structure Position_AST = struct
     type statement = pos DecoratedAST.statement
     type expression = pos DecoratedAST.expression
     type guarded_command = pos DecoratedAST.guarded_command
+
+    exception CustomParseError of string * pos
 end (* structure Position_AST *)
 
 local
