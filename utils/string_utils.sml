@@ -1,13 +1,8 @@
 structure String_Utils = struct
 
-    fun join sep lst = let
-        fun join' lst' soFar = (case lst' of
-            []         => soFar
-          | [head]     => soFar ^ head
-          | head::tail => join' tail (soFar ^ head ^ sep)
-        )
-    in
-        join' lst ""
-    end
+    fun join sep lst = (case lst of
+        []         => ""
+      | head::tail => foldl (fn (x, soFar) => soFar ^ sep ^ x) head tail
+    )
 
 end (* structure String_Utils *)
