@@ -73,10 +73,10 @@ structure AST = struct
         Skip                 => "skip"
       | Abort                => "abort"
       | ExprStmt expr        => exprToString expr
-      | Seq (s0, sx)         => String_Utils.join ";\n" (map stmtToString (s0::sx))
+      | Seq (s0, sx)         => String.concatWith ";\n" (map stmtToString (s0::sx))
       | Assignment assgnList =>
-            (String_Utils.join ", " (map (fn (v, _) => getVarName v) assgnList)) ^ " := "
-          ^ (String_Utils.join ", " (map (fn (_, e) => exprToString e) assgnList))
+            (String.concatWith ", " (map (fn (v, _) => getVarName v) assgnList)) ^ " := "
+          ^ (String.concatWith ", " (map (fn (_, e) => exprToString e) assgnList))
       | IfStmt (gc0, gcx)    => "if\n" ^ (concat (map gcToString (gc0::gcx))) ^ "\nend\n"
       | LoopStmt (gc0, gcx)  => "loop\n" ^ (concat (map gcToString (gc0::gcx))) ^ "\nend\n"
     )
